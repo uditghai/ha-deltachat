@@ -1,0 +1,74 @@
+send_message:
+  name: Send Message
+  description: Sends a text message to a Delta Chat contact or group.
+  fields:
+    from_account:
+      name: Delta Chat Account
+      description: Select the Delta Chat account to send from.
+      required: true
+      selector:
+        config_entry:
+          integration: deltachat
+    target:
+      name: Target
+      description: The email address or Chat ID of the recipient.
+      required: true
+      example: "bot@nine.testrun.org"
+      selector:
+        text:
+    message:
+      name: Message
+      description: The text content of the message.
+      required: true
+      example: "Hello from Home Assistant!"
+      selector:
+        text:
+    file:
+      name: File / Image / Voice Path
+      description: "Optional: The full local path to an image file (e.g., a camera snapshot) or an audio file (.aac, .opus) to send as a voice message."
+      required: false
+      example: "/config/www/snapshots/front_door.jpg"
+      selector:
+        media:
+          accept:
+            - image/*
+            - audio/*
+
+list_chats:
+  name: List Chats
+  description: Returns a list of all active chats known to the bot.
+  fields:
+    from_account:
+      name: Delta Chat Account
+      description: Select the Delta Chat account to send from.
+      required: true
+      selector:
+        config_entry:
+          integration: deltachat # Limits selection to only your integration's entries
+
+list_accounts:
+  name: List Accounts
+  description: Returns a list Accounts in DC. all of these may or may not be configured
+  response:
+    optional: true
+  fields:
+    get_info:
+      name: Get info
+      description: Get info from Account
+      default: false
+      required: false
+      selector:
+        boolean: {}
+
+delete_account:
+  name: Delete Account
+  description: Permanently deletes a local Delta Chat account database by its ID. Use this only if a stale account remains after an integration was removed.
+  fields:
+    account_id:
+      name: Account ID
+      description: The numerical ID of the account to delete (e.g., 1, 2, 3).
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box

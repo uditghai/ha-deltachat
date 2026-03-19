@@ -1,0 +1,13 @@
+{
+    "domain": "deltachat",
+    "name": "Delta Chat",
+    "codeowners": ["@uditghai"],
+    "config_flow": true,
+    "dependencies": [],
+    "issue_tracker": "https://github.com/uditghai/ha-deltachat/issues",
+    "iot_class": "cloud_push",
+    "requirements": [
+        "deltachat-rpc-client==2.44.0","deltachat-rpc-server==2.44.0"
+    ],
+    "version": "0.0.5"
+}

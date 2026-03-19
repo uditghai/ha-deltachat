@@ -1,0 +1,34 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Delta Chat Setup",
+        "menu_options": {
+          "existing": "Log in to existing account",
+          "create": "Create a new Bot profile (Chatmail)"
+        }
+      },
+      "existing": {
+        "title": "Login",
+        "data": {
+          "email": "Email Address",
+          "password": "Password"
+        }
+      },
+      "create": {
+        "title": "Create Bot Profile",
+        "data": {
+          "display_name": "Bot Display Name",
+          "server": "Chatmail Server"
+        }
+      },
+      "profile_extras": {
+        "title": "Profile Customization",
+        "data": {
+          "bio": "Bio / Status",
+          "avatar": "Upload Bot Avatar"
+        }
+      }
+    }
+  }
+}
