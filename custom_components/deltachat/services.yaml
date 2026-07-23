@@ -11,7 +11,7 @@ send_message:
           integration: deltachat
     target:
       name: Target
-      description: The email address or Chat ID of the recipient.
+      description: The Chat ID of the recipient.
       required: true
       example: "bot@nine.testrun.org"
       selector:
@@ -24,7 +24,7 @@ send_message:
       selector:
         text:
     file:
-      name: File / Image / Voice Path
+      name: File / Image / Voice / Video Path
       description: "Optional: The full local path to an image file (e.g., a camera snapshot) or an audio file (.aac, .opus) to send as a voice message."
       required: false
       example: "/config/www/snapshots/front_door.jpg"
@@ -33,6 +33,7 @@ send_message:
           accept:
             - image/*
             - audio/*
+            - video/*
 
 list_chats:
   name: List Chats

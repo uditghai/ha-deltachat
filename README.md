@@ -7,6 +7,7 @@ An **unofficial** Home Assistant integration that allows you to use Delta Chat a
 > [!IMPORTANT]  
 > **Disclaimer**: This is an **unofficial** integration. It is not developed, maintained, or endorsed by the official Delta Chat team.
 
+
 ## 🚀 Features
 
 *   **Instant Notifications**: Send alerts from Home Assistant to your Delta Chat app (individuals or groups).
@@ -49,26 +50,41 @@ An **unofficial** Home Assistant integration that allows you to use Delta Chat a
       ```
 *   **Media Support**: Send snapshots from your security cameras or localized media files directly to your chats.
 
-Sending Images from Home Assistant to DeltaChat
+    __Sending Images from Home Assistant to DeltaChat__
 
+      * Via Send Message Action with file
+        ```yaml
+        action: deltachat.send_message
+        data:
+          // ID of integration. Use the UI mode in developer tools to get this ID
+          from_account: 01FFFFFFFFFFFFFFFFFFFFFFFF 
+          // Chat ID
+          target: "12"
+          message: Test Message
+          file:
+            media_content_id: media-source://<source>
+            media_content_type: image/gif
+        ```
 
-Sending Images from Delta Chat to Home Assistant
-TODO
-```yaml
-event_type: deltachat_message_received
-data:
-  to: XXXXXXXXX@nine.testrun.org
-  to_name: HA DeltaChat Test Bot
-  text: my mouse [Image – 188.48 KiB]
-  sender: 11
-  chat_id: 12
-origin: LOCAL
-time_fired: "2026-06-18T13:40:53.622278+00:00"
-context:
-  id: 01FFFFFFFFFFFFFFFFFFFFFFFF
-  parent_id: null
-  user_id: null
-```
+    __Sending Images from Delta Chat to Home Assistant__
+
+    Once a file is injested via Delta Chat client and event is triggered `deltachat_message_received`, In Home Assistant, Natigate to Media -> Delta Chat -> <Account> -> <Chat> -> and you can see all media files recieved.
+
+    ```yaml
+    event_type: deltachat_message_received
+    data:
+      to: XXXXXXXXX@nine.testrun.org
+      to_name: HA DeltaChat Test Bot
+      text: my image [Image – 188.00 KiB]
+      sender: 11
+      chat_id: 12
+    origin: LOCAL
+    time_fired: "2026-06-18T13:40:53.622278+00:00"
+    context:
+      id: 01FFFFFFFFFFFFFFFFFFFFFFFF
+      parent_id: null
+      user_id: null
+    ```
 
 ## 🛠️ Requirements
 
@@ -159,13 +175,11 @@ context:
 
 
 
+## Known Issues
+Please refer to [Release Notes](RELEASENOTES.md)
 
-## Known Issues (To be fixed in coming releases)
-1.  "Last Command" and " Last Message" Sensor not getting updated when a command or a message is recieved.
-1. Profile Name shows as Unknown in Device screen after initial configuration.
-    1. Updating the Profile once fixes the issue.
-1. Sending and Recieved images and other multimedia is not fully tested for different media types.
-
+## Setting up Development Environment
+Please refer to [Development Environment](DEVENV.md)
 
 
 ## 📜 Credits & Acknowledgments
@@ -177,11 +191,11 @@ This integration is built upon the excellent work of the Delta Chat team. It uti
 The Delta Chat logo and name are used for identification purposes only. All branding assets are sourced from the [official Delta Chat website](https://delta.chat). We give full credit to the original creators for their beautiful design and open-source contributions.
 
 ## Integration Status
-This integration was created primarily for my personal use to get notifications and send commands to HA. it's currently in alpha stage and tested with a small set of accounts on HAOS only. If you had issues or would like any changes / enhancement, Please feel free to open an issue. 
+This integration was created primarily for my personal use to get notifications and send commands to HA. it's currently in alpha stage and tested with a small set of accounts on HAOS only. If you had issues or would like any changes / enhancement, Please feel free to open an issue.
+
 ### Future Roadmap
-* Add a notification / QR code after setting up the integration / account.
-* Fix issues related to syncing of Profile Name and bio post initial setup.
-* Backup configuration and chats
+* Ability to add profile image to account
+* Backup and restore of configuration and chats
 * Change the Disappearing Message settings from the integration
 * Add few standard commands support
   * Trigger Automation

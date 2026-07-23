@@ -8,7 +8,7 @@
     "documentation": "https://github.com/uditghai/ha-deltachat/blob/main/README.md",
     "iot_class": "cloud_push",
     "requirements": [
-        "deltachat-rpc-client==2.44.0","deltachat-rpc-server==2.44.0"
+        "deltachat-rpc-client==2.56.0","deltachat-rpc-server==2.56.0"
     ],
-    "version": "0.0.5"
+    "version": "0.0.6"
 }
