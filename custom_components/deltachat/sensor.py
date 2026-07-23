@@ -5,7 +5,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
-from .const import DOMAIN, DC_EMAIL, DC_DISPLAY_NAME, DC_BIO
+from .const import DOMAIN, DC_EMAIL, CONF_DISPLAY_NAME
 from .common import get_chats
 
 
@@ -21,16 +21,16 @@ async def async_setup_entry(
     bot = data["bot"]
     account = data["account"]
     email = account.get_config(DC_EMAIL)
-    
+    sw_version = data["deltachat_core_version"]
     device_info = DeviceInfo(
-        identifiers={(DOMAIN, entry.entry_id)},
-        name=entry.title,
-        manufacturer="Delta Chat (Unofficial)",
-        model="DeltaChat Bot",
+        identifiers = {(DOMAIN, entry.entry_id)},
+        name = entry.runtime_data.get(CONF_DISPLAY_NAME),
+        manufacturer = "Delta Chat (Unofficial)",
+        model = "DeltaChat Bot",
         serial_number = email,
-        hw_version = account.id,
-        sw_version="2.44.0", # TODO pull sw version from get_system_info()
-        configuration_url=f"https://delta.chat/",
+        hw_version = str(account.id),
+        sw_version = sw_version,
+        configuration_url = "https://delta.chat/",
     )
 
     sensors = [
@@ -39,8 +39,7 @@ async def async_setup_entry(
         DeltaChatTotalChatsSensor(bot,device_info,entry),
         DeltaChatTotalContactsSensor(bot,device_info,entry),
         DeltaChatBotStatusSensor(bot,device_info,entry),
-        DeltaChatBotAccountConfiguredSensor(bot,device_info,entry),
-        DeltaChatFingerprintSensor(bot,device_info,entry)
+        DeltaChatBotAccountConfiguredSensor(bot,device_info,entry)
     ]
     
     async_add_entities(sensors)
@@ -56,7 +55,7 @@ class DeltaChatLastMessageSensor(SensorEntity):
         self._attr_unique_id = f"{entry.entry_id}_last_message"
         self._attr_native_value = "None"
         self._attr_extra_state_attributes = {"sender": None, "time": None}
-
+        self._entry = entry
         self._attr_device_info = device_info
 
     # Listener handler for deltachat_message_received
@@ -77,7 +76,7 @@ class DeltaChatLastMessageSensor(SensorEntity):
         """Update sensor when the bot fires an event."""
         data = event.data
         # fire event only when event is for current account
-        if data.get("to", "") == entry.entry_id:
+        if data.get("to", "") == self._entry.entry_id:
             self.update_state(
                         text=data.get("text", ""), 
                         sender=data.get("sender", "Unknown"), 
@@ -123,7 +122,7 @@ class DeltaChatTotalChatsSensor(SensorEntity):
             self._chat_count = len(chat_list)
         except Exception as err:
             # Fallback to avoid crashing the integration
-            _LOGGER.error(f"DeltaChatTotalChatsSensor: Error {err}")
+            _LOGGER.error(f"{DOMAIN} - DeltaChatTotalChatsSensor: Error {err}")
             self._chat_count = 0
 
 class DeltaChatTotalContactsSensor(SensorEntity):
@@ -150,7 +149,7 @@ class DeltaChatTotalContactsSensor(SensorEntity):
             self._contact_count = len(contacts)
         except Exception as err:
             # Fallback to avoid crashing the integration
-            _LOGGER.error(f"DeltaChatTotalContactsSensor: Error {err}")
+            _LOGGER.error(f"{DOMAIN} - DeltaChatTotalContactsSensor: Error {err}")
             self._contact_count = 0
 
 class DeltaChatBotStatusSensor(SensorEntity):
@@ -193,29 +192,3 @@ class DeltaChatBotAccountConfiguredSensor(SensorEntity):
         self._attr_unique_id = f"{entry.entry_id}_configured"
         self._attr_native_value = bot.account.is_configured()
         self._attr_device_info = device_info
-
-class DeltaChatFingerprintSensor(SensorEntity):
-    """Sensor to display the bot's encryption fingerprint."""
-    
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_name = "Self Fingerprint"
-    _attr_icon = "mdi:fingerprint"
-
-    def __init__(self, bot, device_info,entry):
-        self.bot = bot
-        self._attr_unique_id = f"{entry.entry_id}_fingerprint"
-        self._attr_device_info = device_info
-
-    async def async_update(self) -> None:
-        """Fetch the fingerprint from the RPC server safely."""
-        try:
-            info = await self.hass.async_add_executor_job(
-                self.bot.account.get_info
-            )
-            
-            self._attr_native_value = info.get("fingerprint") or "Not Available"
-
-        except Exception as err:
-            # Fallback to avoid crashing the integration
-            _LOGGER.error("Could not fetch Delta Chat fingerprint: %s", err)
-            self._attr_native_value = "Error"
