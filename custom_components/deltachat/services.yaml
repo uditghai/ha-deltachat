@@ -73,3 +73,23 @@ delete_account:
         number:
           min: 1
           mode: box
+change_account_pic:
+  name: Change Account Profile Picture
+  description: Updates the Profile picture for the given account Account picture
+  fields:
+    from_account:
+      name: Delta Chat Account
+      description: Select the Delta Chat account
+      required: true
+      selector:
+        config_entry:
+          integration: deltachat
+    file:
+      name: Image
+      description: Local path to the new profile pic
+      required: false
+      example: "/config/www/snapshots/pic.jpg"
+      selector:
+        media:
+          accept:
+            - image/*

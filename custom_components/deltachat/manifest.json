@@ -10,5 +10,5 @@
     "requirements": [
         "deltachat-rpc-client==2.56.0","deltachat-rpc-server==2.56.0"
     ],
-    "version": "0.0.6"
+    "version": "0.0.7"
 }

@@ -14,3 +14,19 @@
     ```
 1. To run the server, In the core [Dev Container: Home Assistant Dev] VS Code window -> select the command Tasks: Run Task -> Run Home Assistant Core
 1. Home assistant is now running with the DeltaChat addon on localhost:8123
+
+## Reference Documentation
+
+### Delta Chat
+* Pip deltachat-rpc
+    * https://pypi.org/project/deltachat-rpc-server/
+    * https://pypi.org/project/deltachat-rpc-client/
+* Deltachat Documentation
+    * https://py.delta.chat/jsonrpc/intro.html
+* Codebase for chatmail core
+    * https://github.com/chatmail/core/tree/main
+### Home Assistant
+* Developer Guide
+    * https://developers.home-assistant.io/docs/development_environment/
+* Codebase for Home Assistant core
+    * https://github.com/home-assistant/core

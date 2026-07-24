@@ -68,23 +68,29 @@ An **unofficial** Home Assistant integration that allows you to use Delta Chat a
 
     __Sending Images from Delta Chat to Home Assistant__
 
-    Once a file is injested via Delta Chat client and event is triggered `deltachat_message_received`, In Home Assistant, Natigate to Media -> Delta Chat -> <Account> -> <Chat> -> and you can see all media files recieved.
+    Once a file is injested via Delta Chat client and event is triggered `deltachat_message_received`, In Home Assistant, Natigate to :
+    * Media -> Delta Chat -> Account -> Chat -> Shows all media files in that chat.
 
-    ```yaml
-    event_type: deltachat_message_received
-    data:
-      to: XXXXXXXXX@nine.testrun.org
-      to_name: HA DeltaChat Test Bot
-      text: my image [Image – 188.00 KiB]
-      sender: 11
-      chat_id: 12
-    origin: LOCAL
-    time_fired: "2026-06-18T13:40:53.622278+00:00"
-    context:
-      id: 01FFFFFFFFFFFFFFFFFFFFFFFF
-      parent_id: null
-      user_id: null
-    ```
+  <img src="doc-resources/media-listing.png" />
+
+* **Account Management**: Manage account settings like
+  * Update Profile Name
+  * Update Bio / Description
+  * Change Profile Pic
+
+#### Change Profile Pic
+* Use Service action below to update the Profile picture for an account
+```yaml
+action: deltachat.change_account_pic
+data:
+  from_account: 01FFFFFFFFFFFFFFFFFFFFFFFF
+  file:
+    media_content_id: media-source://<source>
+    media_content_type: image/jpeg
+```
+Or Using the UI in Developer Tools -> Action
+
+  <img src="doc-resources/change-profile-pic-ui.png" />
 
 ## 🛠️ Requirements
 
@@ -132,34 +138,37 @@ An **unofficial** Home Assistant integration that allows you to use Delta Chat a
 
 <img src="https://github.com/user-attachments/assets/f13fc3af-da2c-439d-a8bb-becb738e9e64" />
 
-4. Change the Bot Display name and Chatmail server (Optional)
-    1. If you want to change the Chatmail server, use a similar format `dcaccount:https://nine.testrun.org/new` to configure a new account with a compatible chatmail server. **Please note that you cannot change the Chatmail Server after an account is configured, however you can create a new configuration and add a new Delta Chat Account using the integration**
-    2. You may change the display name later using the Device screen. 
+4. If you want to change the Chatmail server, use a similar format `dcaccount:https://nine.testrun.org/new` to configure a new account with a compatible chatmail server. **Please note that you cannot change the Chatmail Server after an account is configured, however you can create a new configuration and add a new Delta Chat Account using the integration**
+    1. You may change the display name / bio and profile pic later using the Device screen.
 
-<img src="https://github.com/user-attachments/assets/01e5c380-83d4-4102-85fe-3ca4a27ef605" />
+<img src="doc-resources/addentity-new.png" />
 
-5. Add a Bio / Status as required and Submit
-
-<img src="https://github.com/user-attachments/assets/9303a0f2-76f5-4378-ab00-bd4250279cda" />
-
-6. Specify an Area or "Skip and finish"
+5. Specify an Area or "Skip and finish"
 
 <img src="https://github.com/user-attachments/assets/d8a9224f-3889-4759-a053-b488cb7c1349" />
 
-7. Now your Delta Chat bot is ready
+6. Now your Delta Chat bot is ready
 
-<img src="https://github.com/user-attachments/assets/0932bb3f-7223-4b59-ac42-3bd9bd9b704f" />
+<img src="doc-resources/deltachat-device-view.png" />
 
 ## Device View
 
 **Device View** shows the following Configuration values (in Control section) which can be changed
-1. Active Contact (Chat): The Contact / Group that will be notified when Delta Chat notification is used
+1. Active Contact (Chat): The Contact / Group that will be notified when Delta Chat notification entity is used
 2. Profile Bio: Bio of the Contact that you will see in Delta Chat
 3. Profile Name: The Name of the Contact that you will see in Delta Chat
 
+**Sensors**
+1. Shows Total Contacts
+2. Profile Picture
+3. Account's QR Code to add new Contact
 
 ## Adding Contacts
 
+### Using QR Code Entity
+1. On the device view for the account, click on the "QR Code" entity, This will display the QR Code that you can scan to add a new contact for the bot / account.
+
+### Using QR Code URL under Bot Status
 1. Under Diagnostic, click on "Bot Status". The status of bot should be connected.
 2. On the "Bot Status" pop up, Click on 3 dots on top right and select "Details" or Show More based on your HA version
 3. From the Details pop up, Click on your "QR Uri".
@@ -172,7 +181,6 @@ An **unofficial** Home Assistant integration that allows you to use Delta Chat a
 
 5. Scan the QR code with the user account to whom you want to send a message
 6. You can test sending a message from the user to the bot to verify if the delta chat bot received the message
-
 
 
 ## Known Issues

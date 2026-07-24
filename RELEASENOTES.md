@@ -1,3 +1,28 @@
+# Ha-DeltaChat Release Changelog
+
+# Release 0.0.7
+
+> **Disclaimer**
+> :exclamation: This is an **alpha** build and may have issues. Please report any issues at https://github.com/uditghai/ha-deltachat/issues
+
+## New Features / Changes
+#### Change Profile Pic
+* Use Service action below to update the Profile picture for an account
+```yaml
+action: deltachat.change_account_pic
+data:
+  from_account: 01FFFFFFFFFFFFFFFFFFFFFFFF
+  file:
+    media_content_id: media-source://<source>
+    media_content_type: image/jpeg
+```
+Or Using the UI in Developer Tools -> Action
+
+  <img src="doc-resources/change-profile-pic-ui.png" />
+
+* View Profile Pic in Device View
+* Updated Documentation
+
 # Release 0.0.6 Changes
 
 > **Disclaimer**
@@ -30,5 +55,5 @@
   * Setting up Dev environment
 
 ## Known Issues
-* "Last Command" and " Last Message" Sensor not getting updated when a command or a message is received.
+* #5 "Last Command" and " Last Message" Sensor not getting updated when a command or a message is received.
 * Test sending of additional media types like audio etc

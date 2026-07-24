@@ -1,17 +1,17 @@
 import os
 import tempfile
 import mimetypes
-import httpx
 import logging
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.storage import STORAGE_DIR
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from homeassistant.components.media_source import async_resolve_media
 from homeassistant.components.media_player.browse_media import async_process_play_media_url
+from homeassistant.exceptions import ServiceValidationError
 from deltachat_rpc_client import Rpc, DeltaChat, Bot, events, Account
-
 
 from .media_source import DeltaChatMediaView
 from .common import get_chats,extract_id_from_string
@@ -181,13 +181,41 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
+# TODO Should look into passing kargs
+async def async_process_media_content(hass: HomeAssistant,media,process_fn):
+    assert hass and media and callable(process_fn)
+    if isinstance(media, dict):
+        uri = media.get("media_content_id")
+        mime_type = media.get("media_content_type", "")
+
+        # Determine the suffix (e.g., .mp3) from the mime type
+        suffix = mimetypes.guess_extension(mime_type)
+        if uri and uri.startswith("media-source://"):
+            sourced_media = await async_resolve_media(hass, uri, None)
+            url = async_process_play_media_url(hass,sourced_media.url)
+
+            session = async_get_clientsession(hass)
+            async with session.get(url) as resp:
+                content = await resp.read()
+            with tempfile.NamedTemporaryFile(suffix = suffix) as temp_buffer:
+                local_path = temp_buffer.name
+                temp_buffer.write(content)
+                temp_buffer.flush()
+                await hass.async_add_executor_job(process_fn,local_path)
+        else:
+            local_path = uri
+            await hass.async_add_executor_job(process_fn,local_path)
+    else:
+        local_path = media
+        await hass.async_add_executor_job(process_fn,local_path)
+
 def setup_services(hass: HomeAssistant):
     """Register Delta Chat services."""
 
     async def handle_send_message(call: ServiceCall):
         entry_id = call.data["from_account"]
         entry = hass.config_entries.async_get_entry(entry_id)
-        def send():
+        def send(final_path = None):
             try:
                 chat_id = int(target)
                 chat = account.get_chat_by_id(chat_id)
@@ -202,37 +230,31 @@ def setup_services(hass: HomeAssistant):
                 raise
 
         if not entry:
-            raise ValueError(f"Config entry {entry_id} not found")
+            raise ServiceValidationError(f"Config entry {entry_id} not found")
 
         account = entry.runtime_data["account"]
 
         target = call.data["target"]
         message = call.data.get("message")
         file = call.data.get("file")
-        final_path = None
 
-        if isinstance(file, dict):
-            uri = file.get("media_content_id")
-            mime_type = file.get("media_content_type", "")
-
-            # Determine the suffix (e.g., .mp3) from the mime type
-            suffix = mimetypes.guess_extension(mime_type)
-            if uri and uri.startswith("media-source://"):
-                sourced_media = await async_resolve_media(hass, uri, None)
-                url = async_process_play_media_url(hass,sourced_media.url)
-
-                with tempfile.NamedTemporaryFile(suffix = suffix) as temp_buffer:
-                    async with httpx.AsyncClient() as client:
-                        resp = await client.get(url)
-                        temp_buffer.write(resp.content)
-                    final_path = temp_buffer.name
-                    await hass.async_add_executor_job(send)
-            else:
-                final_path = uri
-                await hass.async_add_executor_job(send)
+        if file:
+            await async_process_media_content(hass,file,send)
         else:
-            final_path = file
             await hass.async_add_executor_job(send)
+
+    async def handle_change_account_pic(call: ServiceCall):
+        entry_id = call.data["from_account"]
+        file = call.data.get("file")
+        entry = hass.config_entries.async_get_entry(entry_id)
+        if not entry:
+            raise ServiceValidationError(f"Config entry {entry_id} not found")
+
+        account = entry.runtime_data["account"]
+        def delta_chat_change_profile_pic(local_file_path):
+            account.set_avatar(local_file_path)
+
+        await async_process_media_content(hass,file,delta_chat_change_profile_pic)
 
     async def handle_list_chats(call: ServiceCall) -> ServiceResponse:
         entry_id = call.data["from_account"]
@@ -240,7 +262,7 @@ def setup_services(hass: HomeAssistant):
         entry = hass.config_entries.async_get_entry(entry_id)
         
         if not entry:
-            raise ValueError(f"Config entry {entry_id} not found")
+            raise ServiceValidationError(f"Config entry {entry_id} not found")
 
         account = entry.runtime_data["account"]
         
@@ -280,6 +302,7 @@ def setup_services(hass: HomeAssistant):
     hass.services.async_register(DOMAIN, "list_chats", handle_list_chats, supports_response=SupportsResponse.ONLY)
     hass.services.async_register(DOMAIN, "list_accounts", handle_list_accounts, supports_response=SupportsResponse.ONLY)
     hass.services.async_register(DOMAIN, "delete_account", handle_delete_account)
+    hass.services.async_register(DOMAIN, "change_account_pic", handle_change_account_pic)
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
